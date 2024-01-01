@@ -1,0 +1,148 @@
+# CASINO SLOT MACHINE GAME - PROJECT
+
+import random
+
+MAX_LINES = 3
+MAX_BET = 1000
+MIN_BET = 1
+
+ROWS = 3
+COLUMNS = 3
+
+symbol_count = {"A" : 3,
+                "B" : 5,
+                "C" : 7,
+                "D" : 8}
+
+symbol_winnings = {"A" : 10,
+                   "B" : 6,
+                   "C" : 4,
+                   "D" : 2}                  
+                   
+def check_winnings(lines, values, bet, columns):
+    winnings = 0
+    winning_lines = []
+    for line in range(lines):
+        symbol = columns[0][line]
+        for column in columns:
+            symbol_to_check = column[line]
+            if symbol != symbol_to_check:
+                break   
+        else:
+            winnings = winnings + values[symbol] * bet
+            winning_lines.append(line + 1)
+            
+    return winnings, winning_lines
+
+
+def slot_machine_spinner(rows, cols, symbols):
+    all_symbols = []
+    for symbol, symbol_count in symbols.items():
+        for _ in range(symbol_count):
+            all_symbols.append(symbol)
+    
+    columns = []
+    for _ in range(cols):
+        column = []
+        current_symbols = all_symbols[:]
+        for _ in range(rows):
+            value = random.choice(current_symbols)
+            current_symbols.remove(value)
+            column.append(value)
+            
+        columns.append(column)
+        
+    return columns
+
+def print_slot_machine(columns):
+    for row in range(len(columns[0])):
+        for i, column in enumerate(columns):
+            if i != len(columns) - 1:
+                print(column[row], end=" | ")
+            else:
+               print(column[row], end="") 
+
+        print()
+                
+
+def deposit():  #Function to ask user to deposit the money
+    while True:
+        amount = input("Enter the Amount you wish to Deposit: ")
+        if amount.isdigit():
+            amount = int(amount)
+            if amount>0:
+                break
+            else:
+                print("Amount must be greater than 0")
+        else:
+            print("Please Enter a Number")
+            
+    return amount
+
+def number_of_lines():
+    while True:
+        lines = input("Enter the number of Lines to bet on" + " 1-" + str(MAX_LINES) + " : ")
+        if lines.isdigit():
+            lines = int(lines)
+            if 1 <= lines <= MAX_LINES:
+                break
+            else:
+                print("Please enter a valid number")
+        else:
+            print("Please enter a Number")
+            
+    return lines
+
+def bet_amount():
+    while True:
+        amount = input("Enter the Amount you wish to Bet on each line: ")
+        if amount.isdigit():
+            amount = int(amount)
+            if MIN_BET<=MAX_BET:
+                break
+            else:
+                print(f"Amount must be between {MIN_BET} - {MAX_BET}")
+        else:
+            print("Please Enter a Number")
+            
+    return amount
+
+def game(balance):
+    lines = number_of_lines()
+    
+    while True: 
+        bet = bet_amount()
+        total_bet = bet * lines
+        if total_bet>balance:
+            print("Sorry! Your dont have enough balance to bet")
+        else:
+            break
+    
+    print(f"You are betting {bet} bucks on {lines} lines. Your Total Bet is {bet * lines}\n")
+    
+    slots = slot_machine_spinner(ROWS, COLUMNS, symbol_count)
+    print_slot_machine(slots)
+    
+    winnings, winning_lines = check_winnings(lines, symbol_winnings, bet, slots)
+    print(f"\nAccording to your matched slots your winnings are: {winnings} on lines ", *winning_lines)
+    
+    return winnings - total_bet
+
+
+def main():
+    print("\n----------WELCOME TO SAKSHAM'S CASINO----------\n")
+    balance = deposit()
+    
+    while True:
+        spin = input("Press Enter to play or Enter ""q/Q"" to Quit: ")
+        print("\nYour current Balance: " + str(balance) + "\n")
+        if spin == "q" or spin == "Q":
+            break
+        
+        balance += game(balance)
+            
+    print("Your final Balance: " + str(balance))         
+    
+main()
+
+            
